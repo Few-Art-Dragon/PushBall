@@ -6,20 +6,27 @@ using TMPro;
 
 public class Enemy_Circle : Enemy
 {
-    [SerializeField] private int _minHp, _maxHp;
-    [SerializeField] private new int _hp;
+    private void OnEnable()
+    {
+        OnNextTurnEvent.AddListener(MoveUpEnemy);
+    }
 
     private void Start()
     {
-        NextTurnEvent.AddListener(MoveUp);
-        SetTextHp();
-        SetHp(_minHp, _maxHp, _hp);
-        OutputHp();
+        enemyGameObject = gameObject;
+
+        SetTextHealth();
+        SetHealth(minHealth, maxHealth, health);
+        UpdateTextHealth();
     }
 
-    
+    private void OnDisable()
+    {
+        OnNextTurnEvent.RemoveListener(MoveUpEnemy);
+    }
 
-    
 
-    
+
+
+
 }

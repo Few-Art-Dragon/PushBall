@@ -2,24 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UIElements;
 
-public class Enemy_Square : Enemy
+public class Enemy_Square : Enemy, IRotateObject
 {
-    [SerializeField] private float _speedRotate;
-    [SerializeField] private int _minHp, _maxHp;
-    [SerializeField] private new int _hp;
+    private IRotateObject _iRotateObject;
+
+    [SerializeField]
+    private float _speedRotate;
+
+    void IRotateObject.RotateObject(float speed)
+    {
+        enemyGameObject.transform.Rotate(0, 0, _speedRotate * Time.deltaTime);
+    }
+
+    private void OnEnable()
+    {
+        OnNextTurnEvent.AddListener(MoveUpEnemy);
+    }
 
     private void Start()
     {
-        _enemyGameObject = gameObject;
-        NextTurnEvent.AddListener(MoveUp);
-        SetTextHp();
-        SetHp(_minHp, _maxHp, _hp);
-        OutputHp();
+
+        _iRotateObject = GetComponent<IRotateObject>();
+        enemyGameObject = gameObject;
+        SetTextHealth();
+        SetHealth(minHealth, maxHealth, health);
+        UpdateTextHealth();
     }
+
     private void Update()
     {
-        RotateEnemy(_speedRotate);
+        _iRotateObject.RotateObject(_speedRotate);
     }
-    
+
+    private void OnDisable()
+    {
+        OnNextTurnEvent.RemoveListener(MoveUpEnemy);
+    }
 }

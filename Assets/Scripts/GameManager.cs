@@ -7,27 +7,24 @@ using UnityEngine.Events;
 public class GameManager : MonoBehaviour
 {
 
-    public static UnityEvent GameOverEvent = new UnityEvent();
-    [SerializeField] private GameObject _gameOverPanel;
+    public static UnityEvent OnGameOverEvent = new UnityEvent();
 
-    private void Start()
-    {
-        SetStandartParam();
-    }
-
-    private void SetStandartParam()
-    {
-        GameOverEvent.AddListener(ShowPanel);
-        _gameOverPanel.SetActive(false);
-    }
+    [SerializeField]
+    private GameObject _gameOverPanel;
 
     public void RestartGame()
     {
         SceneManager.LoadScene(0);
     }
 
-    private void ShowPanel()
+    private void ShowGameOverPanel()
     {
         _gameOverPanel.SetActive(true);
+    }
+
+    private void Start()
+    {
+        OnGameOverEvent.AddListener(ShowGameOverPanel);
+        _gameOverPanel.SetActive(false);
     }
 }

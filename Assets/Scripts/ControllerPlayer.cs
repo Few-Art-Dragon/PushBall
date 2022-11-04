@@ -3,53 +3,17 @@ using UnityEngine.Events;
 
 public class ControllerPlayer : MonoBehaviour
 {
-    [SerializeField] private Camera _mainCamera;
+    [SerializeField]
+    private Camera _mainCamera;
     private bool _isGameOver;
-
     private LineRenderer _lineRenderer;
-    public Vector3 _positionDotLineRenderer;
-
-    public Rigidbody2D _rigidbody;
+    private Vector3 _positionDotLineRenderer;
+    private Rigidbody2D _rigidbody;
 
     public static UnityEvent RestartGameEvent = new UnityEvent();
-    public static UnityEvent SetGameOverEvent = new UnityEvent();
-
-    private void Start()
-    {
-        SetStandartParam();
-    }
-
-    private void Update()
-    {
-        CheckTouch();
-    }
-
-    private void OnMouseDown()
-    {
-        if (!_isGameOver)
-        {
-            SwitchLine();
-            _positionDotLineRenderer = _lineRenderer.GetPosition(1);
-            _rigidbody.AddForce(new Vector2(_positionDotLineRenderer.x, _positionDotLineRenderer.y), ForceMode2D.Impulse);
-        }
-    }
-    private void OnBecameInvisible()
-    {
-        Enemy.NextTurnEvent.Invoke();
-        ReturnPositionPlayer();
-    }
-
-    private void SetStandartParam()
-    {
-        SetGameOverEvent.AddListener(SetGameOver);
-        RestartGameEvent.AddListener(ReturnPositionPlayer);
-        _isGameOver = false;
-        _lineRenderer = GetComponentInChildren<LineRenderer>();
-        _positionDotLineRenderer = _lineRenderer.GetPosition(1);
-        _rigidbody = GetComponent<Rigidbody2D>();
-    }
-
-    private void CheckTouch()
+    public static UnityEvent SetOnGameOverEvent = new UnityEvent();
+   
+    private void CheckTouchOnScreen()
     {
         if (Input.GetMouseButton(0) && !_isGameOver)
         {
@@ -75,5 +39,45 @@ public class ControllerPlayer : MonoBehaviour
     private void SetGameOver()
     {
         _isGameOver = true;
+    }
+
+    private void OnEnable()
+    {
+        SetOnGameOverEvent.AddListener(SetGameOver);
+        RestartGameEvent.AddListener(ReturnPositionPlayer);
+    }
+
+    private void Start()
+    {
+        _isGameOver = false;
+        _lineRenderer = GetComponentInChildren<LineRenderer>();
+        _positionDotLineRenderer = _lineRenderer.GetPosition(1);
+        _rigidbody = GetComponent<Rigidbody2D>();
+    }
+
+    private void Update()
+    {
+        CheckTouchOnScreen();
+    }
+
+    private void OnMouseDown()
+    {
+        if (!_isGameOver)
+        {
+            SwitchLine();
+            _positionDotLineRenderer = _lineRenderer.GetPosition(1);
+            _rigidbody.AddForce(new Vector2(_positionDotLineRenderer.x, _positionDotLineRenderer.y), ForceMode2D.Impulse);
+        }
+    }
+    private void OnBecameInvisible()
+    {
+        Enemy.OnNextTurnEvent.Invoke();
+        ReturnPositionPlayer();
+    }
+
+    private void OnDisable()
+    {
+        SetOnGameOverEvent.RemoveListener(SetGameOver);
+        RestartGameEvent.RemoveListener(ReturnPositionPlayer);
     }
 }

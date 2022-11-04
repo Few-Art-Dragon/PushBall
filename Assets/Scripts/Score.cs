@@ -6,24 +6,12 @@ using UnityEngine.Events;
 
 public class Score : MonoBehaviour
 {
-    public static UnityEvent AddScoreEvent = new UnityEvent();
+    public static UnityEvent OnAddScoreEvent = new UnityEvent();
 
     private TMP_Text _textScore;
     private int _score;
 
-    private void Start()
-    {
-        SetStandartParam();
-    }
-
-    private void SetStandartParam()
-    {
-        AddScoreEvent.AddListener(AddScore);
-        _textScore = GetComponent<TMP_Text>();
-        _score = 0;
-    }
-
-    private void Output()
+    private void UpdateScoreText()
     {
         _textScore.text = _score.ToString();
     }
@@ -31,7 +19,23 @@ public class Score : MonoBehaviour
     private void AddScore()
     {
         _score++;
-        Output();
+        UpdateScoreText();
+    }
+
+    private void OnEnable()
+    {
+        OnAddScoreEvent.AddListener(AddScore);
+    }
+
+    private void Start()
+    {
+        _textScore = GetComponent<TMP_Text>();
+        _score = 0;
+    }
+
+    private void OnDisable()
+    {
+        OnAddScoreEvent.RemoveListener(AddScore);
     }
 
 }

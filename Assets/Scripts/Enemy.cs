@@ -4,78 +4,79 @@ using TMPro;
 
 abstract public class Enemy : MonoBehaviour
 {
-    protected GameObject _enemyGameObject;
-    protected TMP_Text _textHp;
+    public static UnityEvent OnNextTurnEvent = new UnityEvent();
 
-    public static UnityEvent NextTurnEvent = new UnityEvent();
+    protected GameObject enemyGameObject;
+    protected TMP_Text textHp;
 
+    [SerializeField]
+    protected int health;
+    [SerializeField]
+    protected int minHealth;
+    [SerializeField]
+    protected int maxHealth;
 
-    protected int _hp { get; set; }
-
-    private void OnCollisionEnter2D(Collision2D collision)
+    protected virtual void MinusHealth()
     {
-        if (collision.transform.TryGetComponent(out ControllerPlayer _))
-        {
-            MinusHp();
-            CheckHp();
-            OutputHp();
-        }
+        health--;
     }
 
-    protected virtual void RotateEnemy(float speed)
-    {
-        _enemyGameObject.transform.Rotate(0, 0, speed * Time.deltaTime);
-    }
-
-    protected virtual void MinusHp()
-    {
-        _hp--;
-    }
-
-    protected virtual void SetHp(int min, int max, int hp)
+    protected virtual void SetHealth(int min, int max, int hp)
     {
         if (min == 0 || max == 0)
         {
-            _hp = hp;
+            health = hp;
         }
         else
         {
-            RandomHp(min, max);
+            SetRandomHealth(min, max);
         }
     }
 
-    protected virtual void RandomHp(int min, int max) { _hp = Random.Range(min, max); }
+    protected virtual void SetRandomHealth(int min, int max) { health = Random.Range(min, max); }
 
-    protected virtual void MoveUp()
+    protected virtual void MoveUpEnemy()
     {
         transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
 
         if (transform.position.y >= 0)
         {
-            GameManager.GameOverEvent.Invoke();
+            GameManager.OnGameOverEvent.Invoke();
         }
     }
-    protected virtual void CheckHp()
+    protected virtual void CheckHealth()
     {
-        if (_hp <= 0)
+        if (health <= 0)
         {
-            SetHp(1, 3, 1);
-            Score.AddScoreEvent.Invoke();
+            SetHealth(1, 3, 1);
+            Score.OnAddScoreEvent.Invoke();
             DestroyEnemy();
         }
     }
-    protected void SetTextHp()
+    protected void SetTextHealth()
     {
-        _textHp = gameObject.GetComponentInChildren<TMP_Text>();
+        textHp = gameObject.GetComponentInChildren<TMP_Text>();
     }
 
-    protected void OutputHp()
+    protected void UpdateTextHealth()
     {
-        _textHp.text = _hp.ToString();
+        textHp.text = health.ToString();
     }
 
     protected virtual void DestroyEnemy()
     {
-        SpawnEnemy.SpawnEnemyEvent.Invoke(gameObject);
+        SpawnEnemy.OnSpawnEnemyEvent.Invoke(gameObject);
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.transform.TryGetComponent(out ControllerPlayer _))
+        {
+            MinusHealth();
+            CheckHealth();
+            UpdateTextHealth();
+        }
+    }
+
 }
+
